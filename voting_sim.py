@@ -8,7 +8,7 @@ from tqdm import tqdm
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Dict, Optional
-
+from abc import ABC, abstractmethod
 
 VOTING_SYSTEMS = {"plurality-with-runoff"}
 
@@ -43,11 +43,38 @@ def conf_logger(
     return log
 
 
+class VotingSystem(ABC):
+    """Strategy for running simulator, akin to given system of voting"""
+
+    @abstractmethod
+    def __init__(self, params: dict):
+        pass
+
+
+class NaivePlurality(VotingSystem):
+    def __init__(self, params: dict):
+        self.parmas = params
+
+
+class PluralityWithRunoff(VotingSystem):
+    def __init__(self, params: dict):
+        self.params = params
+
+
 class VotingSim:
-    def __init__(self, log: logging.Logger):
+    """Singleton for running the simulation"""
+
+    def __init__(
+        self,
+        log: logging.Logger,
+        system: VotingSystem,
+        seed: Optional[int] = None,
+    ):
+        np.random.seed(seed)  # None means random without seed
         self.log = log
         self.t = 0
         self.t_step_size = 1
+        self.voting_system: VotingSystem = system
 
     def tick(self):
         self.t += self.t_step_size
@@ -59,11 +86,23 @@ class VotingSim:
             self.tick()
 
 
+def setup_voting_system(choice: str, parameters: dict) -> VotingSystem:
+    if choice == "plurality":
+        # create voting system here
+        return NaivePlurality(params={})
+    elif choice == "plurality-with-runoff":
+        return RunoffPlurailty(params={})
+    else:
+        raise RuntimeError(f"{choice=} not one of {VOTING_SYSTEMS}")
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
     # setup logger
     filepath = f'logs/voting-sim-{datetime.now().strftime("%d-%m-%Y")}.log'
     log = conf_logger(args.log, filepath)
-    sim = VotingSim(log=log)
+
+    system_to_simulate: VotingSystem = setup_voting_system(args.voting_system)
+    sim = VotingSim(log=log, system=system_to_simulate)
     sim.run(10)
