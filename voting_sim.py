@@ -9,8 +9,12 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
+
+VOTING_SYSTEMS = {"plurality-with-runoff"}
+
+
 parser = argparse.ArgumentParser("voting-sim")
-parser.add_argument("--voting-system", "-v")
+parser.add_argument("--voting-system", "-v", choices=VOTING_SYSTEMS)
 parser.add_argument("--timesteps", "-t", type=int, default=0)
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
