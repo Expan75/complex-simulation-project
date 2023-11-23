@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 VOTING_SYSTEMS = {"plurality-with-runoff"}
 
 
-parser = argparse.ArgumentParser("voting-sim")
+parser = argparse.ArgumentParser("vsim", description="Voting simulator 0.0.1")
 parser.add_argument("--voting-system", "-v", choices=VOTING_SYSTEMS)
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
@@ -69,7 +69,7 @@ class NaivePlurality(VotingSystem):
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
         for voter_i in range(voters):
-            distance = np.linalg.norm(candidates - electorate[voter_i, :])
+            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
             preferred_candidate = np.argmin(distance)
             electoral_vote_count[preferred_candidate] += 1
 
@@ -99,7 +99,7 @@ class VotingSim:
 
     def generate_electorate(self) -> np.ndarray:
         self.log.debug(f"generating electorate of size {(self.voters,self.issues)}")
-        return np.random.rand(self.voters, self.candidates)
+        return np.random.rand(self.voters, self.issues)
 
     def generate_candidates(self) -> np.ndarray:
         self.log.debug(
@@ -111,6 +111,7 @@ class VotingSim:
     def parse_result(self, results: ElectionResult) -> pd.DataFrame:
         outcome_df = pd.DataFrame(asdict(results))
         outcome_df["candidate"] = outcome_df.index
+        outcome_df.columns = ["votes", "candidate"]
         return outcome_df.reset_index().drop(["index"], axis=1)
 
     def run_election(self):
@@ -118,7 +119,7 @@ class VotingSim:
         issues = self.generate_candidates()
         result = self.voting_system.elect(voters, issues)
         outcome = self.parse_result(result)
-        self.log.info("election result")
+        self.log.debug("election result")
         print(outcome)
 
     def run(self):
