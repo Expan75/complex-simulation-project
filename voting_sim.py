@@ -148,5 +148,5 @@ if __name__ == "__main__":
     log = conf_logger(args.log, filepath)
 
     system: VotingSystem = setup_voting_system(args.voting_system)
-    sim = VotingSim(log=log, system=system)
+    sim = VotingSim(log=log, system=system, seed=args.seed)
     sim.run()
