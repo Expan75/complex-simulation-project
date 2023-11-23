@@ -4,11 +4,12 @@ import json
 import scipy
 import logging
 import argparse
+import operator
 import numpy as np
 import pandas as pd
 from datetime import datetime
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 from abc import ABC, abstractmethod
 
 VOTING_SYSTEMS = {"plurality-with-runoff"}
@@ -45,6 +46,7 @@ def conf_logger(
 
 @dataclass
 class ElectionResult:
+    winners: Set[int]
     cast_votes: dict
 
 
@@ -73,7 +75,11 @@ class NaivePlurality(VotingSystem):
             preferred_candidate = np.argmin(distance)
             electoral_vote_count[preferred_candidate] += 1
 
-        result = ElectionResult(electoral_vote_count)
+        # plurality only has a single winner
+        winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
+        winners: Set[int] = {winner_idx}
+        result = ElectionResult(cast_votes=electoral_vote_count, winners=winners)
+
         return result
 
 
@@ -108,19 +114,18 @@ class VotingSim:
 
         return np.random.rand(self.candidates, self.issues)
 
-    def parse_result(self, results: ElectionResult) -> pd.DataFrame:
-        outcome_df = pd.DataFrame(asdict(results))
-        outcome_df["candidate"] = outcome_df.index
-        outcome_df.columns = ["votes", "candidate"]
-        return outcome_df.reset_index().drop(["index"], axis=1)
+    def calculate_fairness(
+        voters: np.ndarray, candidates: np.ndarray, result: ElectionResult
+    ) -> float:
+        """Fairness is calculated as the average distance to the winner"""
+        return 0.0
 
     def run_election(self):
         voters = self.generate_electorate()
-        issues = self.generate_candidates()
-        result = self.voting_system.elect(voters, issues)
-        outcome = self.parse_result(result)
+        candidates = self.generate_candidates()
+        result = self.voting_system.elect(voters, candidates)
         self.log.debug("election result")
-        print(outcome)
+        print(result)
 
     def run(self):
         self.log.debug("running voting sim")
