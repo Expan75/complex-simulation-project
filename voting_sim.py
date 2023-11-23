@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import scipy
 import logging
 import argparse
 import numpy as np
@@ -44,7 +45,7 @@ def conf_logger(
 
 @dataclass
 class ElectionResult:
-    cast_votes: Dict[str, str]
+    cast_votes: dict
 
 
 class VotingSystem(ABC):
@@ -63,7 +64,11 @@ class NaivePlurality(VotingSystem):
         self.parmas = params
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
-        pass
+        distance = scipy.spatial.distance(electorate, candidates)
+        cast_votes = np.argmin(distance, axis=1)
+        vote_count = {i: count for i, count in enumerate(cast_votes)}
+        result = ElectionResult(vote_count)
+        return result
 
 
 class VotingSim:
@@ -71,40 +76,52 @@ class VotingSim:
 
     def __init__(
         self,
-        voters: int,
-        questions: int,
-        candidates: int,
         log: logging.Logger,
         system: VotingSystem,
         seed: Optional[int] = None,
+        population_size: int = 100,
+        n_candidates: int = 2,
     ):
         np.random.seed(seed)  # None means random without seed
         self.log = log
-        self.t_step_size = 1
+
+        # sim params
         self.voting_system: VotingSystem = system
+        self.voters: int = population_size
+        self.candidates: int = n_candidates
+        self.issues: int = 2
 
     def generate_electorate(self) -> np.ndarray:
-        return np.random.rand(self.voters, self.questions)
+        self.log.debug("generating electorate")
+        return np.random.rand(self.voters, self.candidates)
 
     def generate_candidates(self) -> np.ndarray:
-        return np.random.rand(self.candidates, self.questions)
+        self.log.debug("generating candidates")
+        return np.random.rand(self.candidates, self.voters)
 
     def compute_outcome_metrics(self, results: ElectionResult) -> pd.DataFrame:
-        return pd.DataFrame()
+        return pd.DataFrame(results)
 
     def run_election(self):
         voters = self.generate_electorate()
         issues = self.generate_candidates()
-        results = self.voting_system.elect(self.voters, self.issues)
+        results = self.voting_system.elect(voters, issues)
         metrics = self.compute_outcome_metrics(results)
 
+        print("outcome")
+        print(metrics)
+
     def run(self):
+        self.run_election()
         """Runs the simulation"""
         self.log.debug("running voting sim")
 
 
-def setup_voting_system(choice: str, parameters: dict) -> VotingSystem:
-    return NaivePlurality({})
+def setup_voting_system(choice: str) -> VotingSystem:
+    if choice not in VOTING_SYSTEMS:
+        raise RuntimeError(f"{choice=} not one of supported {VOTING_SYSTEMS=}")
+    else:
+        return NaivePlurality({})
 
 
 if __name__ == "__main__":
@@ -115,4 +132,4 @@ if __name__ == "__main__":
     log = conf_logger(args.log, filepath)
 
     system: VotingSystem = setup_voting_system(args.voting_system)
-    sim = VotingSim(log=log, system=system_to_simulate)
+    sim = VotingSim(log=log, system=system)
