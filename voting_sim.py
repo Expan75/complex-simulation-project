@@ -4,7 +4,7 @@ import json
 import logging
 import argparse
 import numpy as np
-from tqdm import tqdm
+import pandas as pd
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Dict, Optional
@@ -15,7 +15,6 @@ VOTING_SYSTEMS = {"plurality-with-runoff"}
 
 parser = argparse.ArgumentParser("voting-sim")
 parser.add_argument("--voting-system", "-v", choices=VOTING_SYSTEMS)
-parser.add_argument("--timesteps", "-t", type=int, default=0)
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
 parser.add_argument("--plot", "-p", action="store_true", required=False)
@@ -43,11 +42,19 @@ def conf_logger(
     return log
 
 
+@dataclass
+class ElectionResult:
+    cast_votes: Dict[str, str]
+
+
 class VotingSystem(ABC):
     """Strategy for running simulator, akin to given system of voting"""
 
-    @abstractmethod
     def __init__(self, params: dict):
+        pass
+
+    @abstractmethod
+    def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         pass
 
 
@@ -55,10 +62,8 @@ class NaivePlurality(VotingSystem):
     def __init__(self, params: dict):
         self.parmas = params
 
-
-class PluralityWithRunoff(VotingSystem):
-    def __init__(self, params: dict):
-        self.params = params
+    def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
+        pass
 
 
 class VotingSim:
@@ -66,34 +71,40 @@ class VotingSim:
 
     def __init__(
         self,
+        voters: int,
+        questions: int,
+        candidates: int,
         log: logging.Logger,
         system: VotingSystem,
         seed: Optional[int] = None,
     ):
         np.random.seed(seed)  # None means random without seed
         self.log = log
-        self.t = 0
         self.t_step_size = 1
         self.voting_system: VotingSystem = system
 
-    def tick(self):
-        self.t += self.t_step_size
+    def generate_electorate(self) -> np.ndarray:
+        return np.random.rand(self.voters, self.questions)
 
-    def run(self, timesteps: int):
+    def generate_candidates(self) -> np.ndarray:
+        return np.random.rand(self.candidates, self.questions)
+
+    def compute_outcome_metrics(self, results: ElectionResult) -> pd.DataFrame:
+        return pd.DataFrame()
+
+    def run_election(self):
+        voters = self.generate_electorate()
+        issues = self.generate_candidates()
+        results = self.voting_system.elect(self.voters, self.issues)
+        metrics = self.compute_outcome_metrics(results)
+
+    def run(self):
         """Runs the simulation"""
         self.log.debug("running voting sim")
-        for _ in tqdm(range(1, timesteps + 1)):
-            self.tick()
 
 
 def setup_voting_system(choice: str, parameters: dict) -> VotingSystem:
-    if choice == "plurality":
-        # create voting system here
-        return NaivePlurality(params={})
-    elif choice == "plurality-with-runoff":
-        return RunoffPlurailty(params={})
-    else:
-        raise RuntimeError(f"{choice=} not one of {VOTING_SYSTEMS}")
+    return NaivePlurality({})
 
 
 if __name__ == "__main__":
@@ -103,6 +114,5 @@ if __name__ == "__main__":
     filepath = f'logs/voting-sim-{datetime.now().strftime("%d-%m-%Y")}.log'
     log = conf_logger(args.log, filepath)
 
-    system_to_simulate: VotingSystem = setup_voting_system(args.voting_system)
+    system: VotingSystem = setup_voting_system(args.voting_system)
     sim = VotingSim(log=log, system=system_to_simulate)
-    sim.run(10)
