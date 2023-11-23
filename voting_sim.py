@@ -115,10 +115,15 @@ class VotingSim:
         return np.random.rand(self.candidates, self.issues)
 
     def calculate_fairness(
-        voters: np.ndarray, candidates: np.ndarray, result: ElectionResult
+        self, voters: np.ndarray, candidates: np.ndarray, result: ElectionResult
     ) -> float:
         """Fairness is calculated as the average distance to the winner"""
-        return 0.0
+        avg_distances = []
+        for winner in result.winners:
+            avg_dist_to_winner = np.mean(np.linalg.norm(candidates[winner] - voters))
+            avg_distances.append(avg_dist_to_winner)
+
+        return float(np.mean(avg_distances))
 
     def run_election(self):
         voters = self.generate_electorate()
@@ -126,6 +131,9 @@ class VotingSim:
         result = self.voting_system.elect(voters, candidates)
         self.log.debug("election result")
         print(result)
+
+        fairness = self.calculate_fairness(voters, candidates, result)
+        print(f"fairness={fairness:.2f}")
 
     def run(self):
         self.log.debug("running voting sim")
