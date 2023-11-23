@@ -64,10 +64,20 @@ class NaivePlurality(VotingSystem):
         self.parmas = params
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
-        distance = scipy.spatial.distance(electorate, candidates)
+        voters, _ = electorate.shape
+        n_candidates, _ = candidates.shape
+        electoral_vote_count = {i: 0 for i in range(voters)}
+
+        for voter_i in electorate:
+            distance = np.linalg.norm(candidates - electorate[voter_i, :])
+            preferred_candidate = np.argmin(distance)
+            electoral_vote_count[preferred_candidate] += 1
+
+        distance = np.linalg.norm(electorate - candidates)
         cast_votes = np.argmin(distance, axis=1)
         vote_count = {i: count for i, count in enumerate(cast_votes)}
         result = ElectionResult(vote_count)
+
         return result
 
 
@@ -92,12 +102,15 @@ class VotingSim:
         self.issues: int = 2
 
     def generate_electorate(self) -> np.ndarray:
-        self.log.debug("generating electorate")
+        self.log.debug(f"generating electorate of size {(self.voters,self.issues)}")
         return np.random.rand(self.voters, self.candidates)
 
     def generate_candidates(self) -> np.ndarray:
-        self.log.debug("generating candidates")
-        return np.random.rand(self.candidates, self.voters)
+        self.log.debug(
+            f"generating candidates of size {(self.candidates, self.issues)}"
+        )
+
+        return np.random.rand(self.candidates, self.issues)
 
     def compute_outcome_metrics(self, results: ElectionResult) -> pd.DataFrame:
         return pd.DataFrame(results)
@@ -133,3 +146,4 @@ if __name__ == "__main__":
 
     system: VotingSystem = setup_voting_system(args.voting_system)
     sim = VotingSim(log=log, system=system)
+    sim.run()
