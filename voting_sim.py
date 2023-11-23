@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional
 from abc import ABC, abstractmethod
 
@@ -66,18 +66,14 @@ class NaivePlurality(VotingSystem):
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
-        electoral_vote_count = {i: 0 for i in range(voters)}
+        electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
-        for voter_i in electorate:
+        for voter_i in range(voters):
             distance = np.linalg.norm(candidates - electorate[voter_i, :])
             preferred_candidate = np.argmin(distance)
             electoral_vote_count[preferred_candidate] += 1
 
-        distance = np.linalg.norm(electorate - candidates)
-        cast_votes = np.argmin(distance, axis=1)
-        vote_count = {i: count for i, count in enumerate(cast_votes)}
-        result = ElectionResult(vote_count)
-
+        result = ElectionResult(electoral_vote_count)
         return result
 
 
@@ -112,29 +108,30 @@ class VotingSim:
 
         return np.random.rand(self.candidates, self.issues)
 
-    def compute_outcome_metrics(self, results: ElectionResult) -> pd.DataFrame:
-        return pd.DataFrame(results)
+    def parse_result(self, results: ElectionResult) -> pd.DataFrame:
+        outcome_df = pd.DataFrame(asdict(results))
+        outcome_df["candidate"] = outcome_df.index
+        return outcome_df.reset_index().drop(["index"], axis=1)
 
     def run_election(self):
         voters = self.generate_electorate()
         issues = self.generate_candidates()
-        results = self.voting_system.elect(voters, issues)
-        metrics = self.compute_outcome_metrics(results)
-
-        print("outcome")
-        print(metrics)
+        result = self.voting_system.elect(voters, issues)
+        outcome = self.parse_result(result)
+        self.log.info("election result")
+        print(outcome)
 
     def run(self):
+        self.log.debug("running voting sim")
         self.run_election()
         """Runs the simulation"""
-        self.log.debug("running voting sim")
 
 
 def setup_voting_system(choice: str) -> VotingSystem:
     if choice not in VOTING_SYSTEMS:
         raise RuntimeError(f"{choice=} not one of supported {VOTING_SYSTEMS=}")
     else:
-        return NaivePlurality({})
+        return NaivePlurality(params={})
 
 
 if __name__ == "__main__":
