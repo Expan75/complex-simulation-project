@@ -61,7 +61,7 @@ class VotingSimulator:
             f"generating candidates of size {(self.n_candidates, self.n_issues)}"
         )
 
-        model = KMeans(n_clusters=self.n_candidates).fit(self.electorate)
+        model = KMeans(n_clusters=self.n_candidates, n_init="auto").fit(self.electorate)
         return model.cluster_centers_
 
     def calculate_fairness(self, result: ElectionResult) -> float:
