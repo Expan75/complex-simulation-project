@@ -3,6 +3,7 @@ from datetime import datetime
 
 import common
 import simulation
+import electorate
 
 
 # setup cli
@@ -15,6 +16,9 @@ parser.add_argument(
 )
 parser.add_argument("--candidates", "-c", type=int, default=2)
 parser.add_argument("--population", "-p", type=int, default=10_000)
+parser.add_argument(
+    "--electorate-scenario",
+)
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
 
