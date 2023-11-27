@@ -26,6 +26,20 @@ def generate_polarized_electorate(electorate_size: int, issues: int) -> np.ndarr
     return electorate
 
 
+ELECTORATE_SCENARIOS = {
+    "random": generate_random_electorate,
+    "centered": generate_centered_electorate,
+    "polarized": generate_polarized_electorate,
+}
+
+
+def setup_electorate(electorate_size, issues, scenario="random") -> np.ndarray:
+    try:
+        return ELECTORATE_SCENARIOS[scenario](electorate_size, issues)
+    except KeyError:
+        raise KeyError(f"{scenario} is not one of {set(ELECTORATE_SCENARIOS.keys())}")
+
+
 if __name__ == "__main__":
     import pandas as pd
     import seaborn as sns

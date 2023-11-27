@@ -15,12 +15,12 @@ parser.add_argument(
     required=True,
 )
 parser.add_argument("--candidates", "-c", type=int, default=2)
+parser.add_argument("--issues", "-i", type=int, default=2)
 parser.add_argument("--population", "-p", type=int, default=10_000)
-parser.add_argument(
-    "--electorate-scenario",
-)
+parser.add_argument("--scenario", "-e", choices=electorate.ELECTORATE_SCENARIOS.keys())
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
+parser.add_argument("--debug", "-d", action="store_true", default=False)
 
 
 def main():
@@ -31,12 +31,16 @@ def main():
     log = common.conf_logger(args.log, filepath)
 
     system = common.setup_voting_system(args.voting_system)
+    voters = electorate.setup_electorate(args.population, args.issues, args.scenario)
+
     sim = simulation.VotingSimulator(
         log=log,
         system=system,
         seed=args.seed,
+        plot=args.debug,
+        electorate=voters,
+        scenario=args.scenario,
         n_candidates=args.candidates,
-        population_size=args.population,
     )
     sim.run()
 
