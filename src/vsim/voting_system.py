@@ -5,7 +5,6 @@ To add a new voting system, subclass the VotingSystem abstract base calss and be
 """
 import operator
 import numpy as np
-
 from abc import ABC, abstractmethod
 from typing import List, Set
 from dataclasses import dataclass
@@ -95,3 +94,15 @@ class PopularMajority(VotingSystem):
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         results: List[ElectionResult] = self.elect_rec(electorate, candidates)
         return results[-1]
+
+
+# constant of what systems are supported currently
+SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority}
+
+
+def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
+    """Helper for setting up the correct voting system"""
+    try:
+        return SUPPORTED_VOTING_SYSTEMS[name](params=params)
+    except KeyError:
+        raise KeyError(f"{name=} is not one of {SUPPORTED_VOTING_SYSTEMS.values()}")

@@ -83,16 +83,14 @@ class VotingSimulator:
 
         columns = [f"issue_{i}" for i in range(1, self.n_issues + 1)]
         electorate_df = pd.DataFrame(self.electorate, columns=columns)
-        electorate_df["candidate"] = False
+        electorate_df["state"] = "member of public"
 
         # add candidates to same df to ease plotting
         candidate_df = pd.DataFrame(self.candidates, columns=columns)
-        candidate_df["candidate"] = True
+        candidate_df["state"] = "candidate"
         df = pd.concat([electorate_df, candidate_df])
 
-        print(df)
-
-        sns.scatterplot(data=df, x="issue_1", y="issue_2", hue="candidate", ax=ax)
+        sns.scatterplot(data=df, x="issue_1", y="issue_2", hue="state", ax=ax)
         ax.set_title(f"scenario={self.scenario}, {fairness=}")
 
         plt.show()

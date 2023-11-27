@@ -4,14 +4,14 @@ from datetime import datetime
 import common
 import simulation
 import electorate
-
+import voting_system
 
 # setup cli
 parser = argparse.ArgumentParser("vsim", description="Voting simulator 0.0.1")
 parser.add_argument(
     "--voting-system",
     "-v",
-    choices=common.SUPPORTED_VOTING_SYSTEMS.keys(),
+    choices=voting_system.SUPPORTED_VOTING_SYSTEMS.keys(),
     required=True,
 )
 parser.add_argument("--candidates", "-c", type=int, default=2)
@@ -30,7 +30,7 @@ def main():
     filepath = f'logs/voting-sim-{datetime.now().strftime("%d-%m-%Y")}.log'
     log = common.conf_logger(args.log, filepath)
 
-    system = common.setup_voting_system(args.voting_system)
+    system = voting_system.setup_voting_system(args.voting_system)
     voters = electorate.setup_electorate(args.population, args.issues, args.scenario)
 
     sim = simulation.VotingSimulator(

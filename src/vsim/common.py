@@ -1,19 +1,6 @@
 import os
 import sys
 import logging
-from voting_system import NaivePlurality, PopularMajority, VotingSystem
-
-
-# constant of what systems are supported currently
-SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority}
-
-
-def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
-    """Helper for setting up the correct voting system"""
-    try:
-        return SUPPORTED_VOTING_SYSTEMS[name](params=params)
-    except KeyError:
-        raise KeyError(f"{name=} is not one of {SUPPORTED_VOTING_SYSTEMS.values()}")
 
 
 def conf_logger(
