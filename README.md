@@ -8,18 +8,20 @@ This repo contains the code for simulating voting systems as part of a class pro
 # install dependencies
 python3 -m pip install -r requirements.txt
 
-# run the simulation for a given voting system
+# run the simulation for a given voting system, and visualise
 python3 src/vsim/cli.py \
-    --voting-system majority \
-    --candidates 5
-    --population 10_000
+    --voting-system plurality \
+    --scenario polarized \
+    --candidates 2 \
+    --population 10_000 \
+    --debug \
+    --log debug
 
 # run with more settings, logging and graphical output
 python3 src/vsim/cli.py \
     --voting-system majority \
     --candidates 5
     --population 10_000
-    --log debug
 ```
 
 Supported systems of voting are currently:
