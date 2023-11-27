@@ -1,3 +1,8 @@
+"""
+This module contains strategy classes that implement different voting systems
+
+To add a new voting system, subclass the VotingSystem abstract base calss and be sure to implement the 'elect' method. Have a look at one of the current implementations for help!
+"""
 import operator
 import numpy as np
 
