@@ -124,7 +124,7 @@ class ApprovalVoting(VotingSystem):  # får rösta på hur många partier som he
     
 
 # constant of what systems are supported currently
-SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority, "approval": ApprovalVoting}
+SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority, "approval":ApprovalVoting}
 
 def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
     """Helper for setting up the correct voting system"""
