@@ -96,9 +96,35 @@ class PopularMajority(VotingSystem):
         return results[-1]
 
 
-# constant of what systems are supported currently
-SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority}
+class ApprovalVoting(VotingSystem):  # får rösta på hur många partier som helst. Den med flest röster vinner, 
+    # de k närmaste kandidaterna röstar varje electorate på då nrVotes
+    def __init__(self, params: dict):
+        self.params = params
+        self.nrVotes = params.get("nrVotes", 3) # är rätt? 3 om ej valt
 
+    def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
+
+        voters, _ = electorate.shape
+        n_candidates, _ = candidates.shape
+        electoral_vote_count = {i: 0 for i in range(n_candidates)}
+
+        for voter_i in range(voters):
+            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
+
+            top_candidate_idx = np.argpartition(distance, self.nrVotes)[:self.nrVotes] # ger array med indices för k närmaste kandidaterna
+            
+            for i_candidate in top_candidate_idx: # går igenom alla indices för 
+                electoral_vote_count[i_candidate] += 1
+
+        winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
+        winners: Set[int] = {winner_idx}
+        result = ElectionResult(cast_votes=electoral_vote_count, winners=winners)
+
+        return result
+    
+
+# constant of what systems are supported currently
+SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority, "approval":ApprovalVoting}
 
 def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
     """Helper for setting up the correct voting system"""
