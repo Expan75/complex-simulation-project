@@ -33,11 +33,13 @@ ELECTORATE_SCENARIOS = {
 }
 
 
+def normalize(v: np.ndarray) -> np.ndarray:
+    """Needs to happen for our distance metric to be comparable across systems"""
+    return v / (np.linalg.norm(v) + 1e-16)
+
+
 def setup_electorate(electorate_size, issues, scenario="random") -> np.ndarray:
-    try:
-        return ELECTORATE_SCENARIOS[scenario](electorate_size, issues)
-    except KeyError:
-        raise KeyError(f"{scenario} is not one of {set(ELECTORATE_SCENARIOS.keys())}")
+    return normalize(ELECTORATE_SCENARIOS[scenario](electorate_size, issues))
 
 
 if __name__ == "__main__":

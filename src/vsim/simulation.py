@@ -81,7 +81,7 @@ class VotingSimulator:
 
         columns = [f"issue_{i}" for i in range(1, self.n_issues + 1)]
         electorate_df = pd.DataFrame(self.electorate, columns=columns)
-        electorate_df["state"] = "member of public"
+        electorate_df["state"] = "voter"
 
         # add candidates to same df to ease plotting
         candidate_df = pd.DataFrame(self.candidates, columns=columns)
