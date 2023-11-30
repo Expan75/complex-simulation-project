@@ -21,6 +21,7 @@ parser.add_argument("--scenario", "-e", choices=electorate.ELECTORATE_SCENARIOS.
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
 parser.add_argument("--debug", "-d", action="store_true", default=False)
+parser.add_argument("--output-dir", "-o", type=str, default="")
 
 
 def main():

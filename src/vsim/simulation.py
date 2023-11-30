@@ -32,8 +32,6 @@ class VotingSimulator:
         self.plot = plot
         self.log = log
 
-        voters, issues = electorate.shape
-
         # sim params
         self.scenario = scenario
         self.voting_system: VotingSystem = system
@@ -44,7 +42,7 @@ class VotingSimulator:
         self.candidates = self.generate_candidates()
 
     @property
-    def n_votes(self) -> int:
+    def n_voters(self) -> int:
         return int(self.electorate.shape[0])
 
     @property
