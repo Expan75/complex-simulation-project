@@ -9,7 +9,11 @@ from typing import Dict, Callable, Optional
 
 
 def generate_polarized_electorate(
-    electorate_size: int, issues: int, clusters: int, seed: Optional[int] = None
+    electorate_size: int,
+    issues: int,
+    clusters: int,
+    seed: Optional[int] = None,
+    cluster_std=1,
 ) -> np.ndarray:
     """Generates a voter base which is polarized, i.e. split in distinct clusters"""
     return np.array(
@@ -18,6 +22,7 @@ def generate_polarized_electorate(
             n_features=issues,
             centers=clusters,
             random_state=seed,
+            cluster_std=cluster_std,
         )[0]
     )
 
@@ -35,9 +40,13 @@ def normalize(v: np.ndarray) -> np.ndarray:
 
 
 def setup_electorate(
-    electorate_size, issues, scenario, seed: Optional[int] = None
+    electorate_size, issues, scenario, seed: Optional[int] = None, cluster_std=1
 ) -> np.ndarray:
-    return normalize(ELECTORATE_SCENARIOS[scenario](electorate_size, issues, seed=seed))
+    return normalize(
+        ELECTORATE_SCENARIOS[scenario](
+            electorate_size, issues, seed=seed, cluster_std=cluster_std
+        )
+    )
 
 
 if __name__ == "__main__":
