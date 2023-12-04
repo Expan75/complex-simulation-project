@@ -64,6 +64,31 @@ class VotingSimulator:
         model = KMeans(n_clusters=self.n_candidates, n_init="auto").fit(self.electorate)
         return model.cluster_centers_
 
+    def generate_swedish_candidates(self) -> np.ndarray:
+        """
+        Generates the Swedish political parties based on: https://www.chesdata.eu/2019-chapel-hill-expert-survey
+        See research folder file: CHES2019V3
+        Coordinate system where x-axis is GAL-TAN and y-axis is economic right(10) and left(0)
+            party	galtan	lrecon
+            V	1.9411764	1.7647059
+            S	4.4117646	4.1176472
+            C	2.2352941	8
+            L	3.2352941	7.1176472
+            M	5.9411764	7.7058825
+            KD	7.0588236	7.2352943
+            MP	1.5882353	3.9411764
+            SD	8.7647057	5.5882354
+        """
+        parties = np.array([[1.9411764, 1.7647059],
+                        [4.4117646, 4.1176472],
+                        [2.2352941, 8],
+                        [3.2352941, 7.1176472],
+                        [5.9411764, 7.7058825],
+                        [7.0588236, 7.2352943],
+                        [1.5882353, 3.9411764],
+                        [8.7647057, 5.5882354]])
+        return parties
+
     def calculate_fairness(self, result: ElectionResult) -> float:
         """Fairness is calculated as the average distance to the winner"""
         avg_distances = []
