@@ -1,8 +1,6 @@
 import argparse
 from datetime import datetime
-
-import common
-from src.vsim import simulation, electorate, voting_system
+from src.vsim import candidates, electorate, voting_system, simulation, common
 
 # setup cli
 parser = argparse.ArgumentParser("vsim", description="Voting simulator 0.0.1")
@@ -13,6 +11,12 @@ parser.add_argument(
     required=True,
 )
 parser.add_argument("--candidates", "-c", type=int, default=2)
+parser.add_argument(
+    "--candidate-scenario",
+    "-cs",
+    choices=candidates.CANDIDATE_OPTIONS.keys(),
+    default="default",
+)
 parser.add_argument("--issues", "-i", type=int, default=2)
 parser.add_argument("--population", "-p", type=int, default=10_000)
 parser.add_argument("--scenario", "-e", choices=electorate.ELECTORATE_SCENARIOS.keys())
@@ -29,17 +33,22 @@ def main():
     filepath = f'logs/voting-sim-{datetime.now().strftime("%d-%m-%Y")}.log'
     log = common.conf_logger(args.log, filepath)
 
-    system = voting_system.setup_voting_system(args.voting_system)
-    voters = electorate.setup_electorate(args.population, args.issues, args.scenario)
+    s = voting_system.setup_voting_system(args.voting_system)
+    v = electorate.setup_electorate(
+        args.population, args.issues, args.electorate_scenario
+    )
+    c = candidates.setup_candidates(
+        args.candidates, args.issues, args.candidate_scenario
+    )
 
     sim = simulation.VotingSimulator(
         log=log,
-        system=system,
+        system=s,
+        electorate=v,
+        candidates=c,
         seed=args.seed,
         plot=args.debug,
-        electorate=voters,
         scenario=args.scenario,
-        n_candidates=args.candidates,
     )
     sim.run()
 
