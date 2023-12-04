@@ -3,11 +3,14 @@ Module for generating different kinds of electorate, represented
 as a (n_individuals, n_issues) matrix.
 """
 import numpy as np
+from functools import partial
+from sklearn.datasets import make_blobs
+from typing import Tuple
 
 
 def generate_random_electorate(electorate_size: int, issues: int) -> np.ndarray:
     """Generates a completely random voter base, without any tendency"""
-    return np.random.rand(electorate_size, issues)
+    return np.random.uniform(0, 1, size=(electorate_size, issues))
 
 
 def generate_centered_electorate(electorate_size: int, issues: int) -> np.ndarray:
@@ -15,21 +18,20 @@ def generate_centered_electorate(electorate_size: int, issues: int) -> np.ndarra
     return np.random.normal(loc=0, scale=1.0, size=(electorate_size, issues))
 
 
-def generate_polarized_electorate(electorate_size: int, issues: int) -> np.ndarray:
-    """Generates a voter base which is highly polarized"""
-    partial_size = (electorate_size // 2, issues)
-    left = np.random.normal(0 - 5, scale=1.0, size=partial_size)
-    right = np.random.normal(0 + 5, scale=1.0, size=partial_size)
-    electorate = np.r_[left, right]
-
-    assert electorate.shape == (electorate_size, issues)
-    return electorate
+def generate_polarized_electorate(
+    electorate_size: int, issues: int, clusters: int = 2
+) -> np.ndarray:
+    """Generates a voter base which is polarized, i.e. split in distinct clusters"""
+    return np.array(
+        make_blobs(n_samples=electorate_size, n_features=issues, centers=clusters)[0]
+    )
 
 
 ELECTORATE_SCENARIOS = {
     "random": generate_random_electorate,
     "centered": generate_centered_electorate,
-    "polarized": generate_polarized_electorate,
+    "bipolar": partial(generate_polarized_electorate, clusters=2),
+    "tripolar": partial(generate_polarized_electorate, clusters=3),
 }
 
 
