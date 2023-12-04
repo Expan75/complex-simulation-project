@@ -6,10 +6,10 @@ This repo contains the code for simulating voting systems as part of a class pro
 
 This matrix corresponds to the experiments were are planning to run and wether or not the simulator currently supports doing so.
 
-| hej | idk |
-| --- | --- |
-| 1   | []  |
-| 3   | [x] |
+| hej | supported                |
+| --- | ------------------------ |
+| 1   | <ul><li>- [x] </li></ul> |
+| 3   | <ul><li> [] </li></ul>   |
 
 ### Getting started
 
