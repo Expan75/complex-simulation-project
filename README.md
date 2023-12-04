@@ -20,7 +20,7 @@ This matrix corresponds to the experiments were are planning to run and wether o
 python3 -m pip install -r requirements.txt
 
 # run the simulation for a given voting system, and visualise
-python3 src/vsim/cli.py \
+python3 cli.py \
     --voting-system plurality \
     --scenario polarized \
     --candidates 2 \
@@ -29,7 +29,7 @@ python3 src/vsim/cli.py \
     --log debug
 
 # run with more settings, logging and graphical output
-python3 src/vsim/cli.py \
+python3 cli.py \
     --voting-system majority \
     --candidates 5
     --population 10_000
