@@ -29,7 +29,7 @@ class VotingSystem(ABC):
 
 class NaivePlurality(VotingSystem):
     def __init__(self, params: dict):
-        super().__init__(params)
+        self.params = params
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
@@ -51,7 +51,7 @@ class NaivePlurality(VotingSystem):
 
 class PopularMajority(VotingSystem):
     def __init__(self, params: dict):
-        super().__init__(params)
+        self.params = params
 
     def elect_rec(
         self, electorate: np.ndarray, candidates: np.ndarray, prior_results=[]
@@ -93,17 +93,14 @@ class PopularMajority(VotingSystem):
         return results[-1]
 
 
-class ApprovalVoting(
-    VotingSystem
-):  # får rösta på hur många partier som helst. Den med flest röster vinner,
-    # de k närmaste kandidaterna röstar varje electorate på då nrVotes
+class ApprovalVoting(VotingSystem):
     def __init__(self, params: dict):
         self.params = params
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
+        n_votes = self.params["n_votes"]
         voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
-        n_votes = self.params["n_votes"]
         assert n_votes <= n_candidates, "more votes than candidates"
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
@@ -129,6 +126,8 @@ SUPPORTED_VOTING_SYSTEMS = {
 
 def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
     """Helper for setting up the correct voting system"""
+    if name == "approval":
+        params["n_votes"] = 3
     try:
         return SUPPORTED_VOTING_SYSTEMS[name](params=params)
     except KeyError:
