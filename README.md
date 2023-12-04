@@ -28,6 +28,7 @@ Supported systems of voting are currently:
 
 - plurality
 - majority
+- approval
 
 ### Contributing
 
@@ -59,5 +60,14 @@ Voting systems: plurality, majority, approval
 Populaton size: 10 000, 100 000, 1 000 000, 10 000 000
 Candidates: 2, 4, 6, 8
 scenario: centered, random, polarized 2 cohorts, polarized 4 cohorts, polarized 6 cohorts, polarized 8 cohorts,
+standard deviations, what is proper standard deviation?
 
+### Future testing parameters
+Voting apathy (to long distance --> no vote)
 
+simulate the swedish parties from data in reasearch 
+
+strategic voting (vote nearest)
+support voting (4% limit)
+
+3 dimensional space? kinda easy to visualize and add another axis from CHES2019V3?
