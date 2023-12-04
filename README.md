@@ -9,7 +9,7 @@ This matrix corresponds to the experiments were are planning to run and wether o
 | hej | supported                |
 | --- | ------------------------ |
 | 1   | <ul><li>- [x] </li></ul> |
-| 3   | <ul><li>- [] </li></ul>  |
+| 3   | <ul><li>- [ ] </li></ul> |
 
 ### Getting started
 
