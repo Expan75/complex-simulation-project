@@ -1,10 +1,6 @@
 import argparse
 from datetime import datetime
-import candidates
-import electorate
-import voting_system
-import simulation
-import common
+from vsim import candidates, electorate, voting_system, common, simulation
 
 # setup cli
 parser = argparse.ArgumentParser("vsim", description="Voting simulator 0.0.1")
