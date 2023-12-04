@@ -4,7 +4,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from typing import Optional
-from src.vsim.voting_system import VotingSystem, ElectionResult
+from voting_system import VotingSystem, ElectionResult
 
 
 class VotingSimulator:
