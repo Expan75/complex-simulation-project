@@ -25,7 +25,6 @@ def generate_polarized_electorate(electorate_size: int, issues: int) -> np.ndarr
     assert electorate.shape == (electorate_size, issues)
     return electorate
 
-
 ELECTORATE_SCENARIOS = {
     "random": generate_random_electorate,
     "centered": generate_centered_electorate,
@@ -58,6 +57,8 @@ if __name__ == "__main__":
 
     polarized_electorate = generate_polarized_electorate(electorate, issues)
     polarized_df = pd.DataFrame(polarized_electorate, columns=columns)
+
+
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, tight_layout=True)
     sns.kdeplot(random_df, ax=ax1)

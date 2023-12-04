@@ -91,6 +91,7 @@ class VotingSimulator:
 
     def calculate_fairness(self, result: ElectionResult) -> float:
         """Fairness is calculated as the average distance to the winner"""
+        
         avg_distances = []
         for winner in result.winners:
             avg_dist_to_winner = np.mean(
