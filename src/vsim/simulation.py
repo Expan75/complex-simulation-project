@@ -5,10 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from typing import Optional
 from sklearn.cluster import KMeans
-from voting_system import VotingSystem, ElectionResult
-
-
-__all__ = ["VotingSimulator"]
+from src.vsim.voting_system import VotingSystem, ElectionResult
 
 
 class VotingSimulator:

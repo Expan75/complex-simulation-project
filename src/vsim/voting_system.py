@@ -10,9 +10,6 @@ from typing import List, Set
 from dataclasses import dataclass
 
 
-__all__ = ["VotingSystem", "NaivePlurality", "PopularMajority", "ElectionResult"]
-
-
 @dataclass
 class ElectionResult:
     winners: Set[int]
