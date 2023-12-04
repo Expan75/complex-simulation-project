@@ -100,18 +100,20 @@ class ApprovalVoting(VotingSystem):  # får rösta på hur många partier som he
     # de k närmaste kandidaterna röstar varje electorate på då nrVotes
     def __init__(self, params: dict):
         self.params = params
-        self.nrVotes = params.get("nrVotes", 3) # är rätt? 3 om ej valt
-
+        #self.nrVotes = params.get("nrVotes", 3) # är rätt? 3 om ej valt
+        #dict 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
 
         voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
+        #self.nrVotes = min(self.nrVotes, n_candidates - 1) # så att inte mer än antalet kandidater och -1 för index 
+        assert self.params["nrVotes"] > n_candidates, "more votes than candidates"
         for voter_i in range(voters):
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
 
-            top_candidate_idx = np.argpartition(distance, self.nrVotes)[:self.nrVotes] # ger array med indices för k närmaste kandidaterna
+            top_candidate_idx = np.argpartition(distance, self.params["nrVotes"])[:self.params["nrVotes"]] # ger array med indices för k närmaste kandidaterna
             
             for i_candidate in top_candidate_idx: # går igenom alla indices för 
                 electoral_vote_count[i_candidate] += 1

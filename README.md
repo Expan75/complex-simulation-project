@@ -51,3 +51,13 @@ git push -u origin my-feature-branch
 4. Navigate to (GitHub)[https://github.com/Expan75/complex-simulation-project/pulls] and create a new pull request under the branch to merge into main.
 
 5. Complete code review and your done!
+
+
+### Testing parameters 
+
+Voting systems: plurality, majority, approval
+Populaton size: 10 000, 100 000, 1 000 000, 10 000 000
+Candidates: 2, 4, 6, 8
+scenario: centered, random, polarized 2 cohorts, polarized 4 cohorts, polarized 6 cohorts, polarized 8 cohorts,
+
+
