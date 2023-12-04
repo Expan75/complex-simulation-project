@@ -10,9 +10,6 @@ from typing import List, Set
 from dataclasses import dataclass
 
 
-__all__ = ["VotingSystem", "NaivePlurality", "PopularMajority", "ElectionResult"]
-
-
 @dataclass
 class ElectionResult:
     winners: Set[int]
@@ -32,7 +29,7 @@ class VotingSystem(ABC):
 
 class NaivePlurality(VotingSystem):
     def __init__(self, params: dict):
-        super().__init__(params)
+        self.params = params
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
@@ -54,7 +51,7 @@ class NaivePlurality(VotingSystem):
 
 class PopularMajority(VotingSystem):
     def __init__(self, params: dict):
-        super().__init__(params)
+        self.params = params
 
     def elect_rec(
         self, electorate: np.ndarray, candidates: np.ndarray, prior_results=[]
@@ -96,40 +93,41 @@ class PopularMajority(VotingSystem):
         return results[-1]
 
 
-class ApprovalVoting(VotingSystem):  # får rösta på hur många partier som helst. Den med flest röster vinner, 
-    # de k närmaste kandidaterna röstar varje electorate på då nrVotes
+class ApprovalVoting(VotingSystem):
     def __init__(self, params: dict):
         self.params = params
-        #self.nrVotes = params.get("nrVotes", 3) # är rätt? 3 om ej valt
-        #dict 
-    def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
 
+    def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
+        n_votes = self.params["n_votes"]
         voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
+        assert n_votes <= n_candidates, "more votes than candidates"
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
-        #self.nrVotes = min(self.nrVotes, n_candidates - 1) # så att inte mer än antalet kandidater och -1 för index 
-        assert self.params["nrVotes"] > n_candidates, "more votes than candidates"
         for voter_i in range(voters):
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
-
-            top_candidate_idx = np.argpartition(distance, self.params["nrVotes"])[:self.params["nrVotes"]] # ger array med indices för k närmaste kandidaterna
-            
-            for i_candidate in top_candidate_idx: # går igenom alla indices för 
-                electoral_vote_count[i_candidate] += 1
+            for top_candidate_id in np.argpartition(distance, range(n_votes))[:n_votes]:
+                electoral_vote_count[top_candidate_id] += 1
 
         winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
         winners: Set[int] = {winner_idx}
         result = ElectionResult(cast_votes=electoral_vote_count, winners=winners)
 
         return result
-    
+
 
 # constant of what systems are supported currently
-SUPPORTED_VOTING_SYSTEMS = {"plurality": NaivePlurality, "majority": PopularMajority, "approval":ApprovalVoting}
+SUPPORTED_VOTING_SYSTEMS = {
+    "plurality": NaivePlurality,
+    "majority": PopularMajority,
+    "approval": ApprovalVoting,
+}
+
 
 def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
     """Helper for setting up the correct voting system"""
+    if name == "approval":
+        params["n_votes"] = 3
     try:
         return SUPPORTED_VOTING_SYSTEMS[name](params=params)
     except KeyError:

@@ -2,6 +2,17 @@
 
 This repo contains the code for simulating voting systems as part of a class project for FFR120.
 
+### Experiments
+
+This matrix corresponds to the experiments were are planning to run and wether or not the simulator currently supports doing so. Completed means that results of simulation are captured in a version controlled notebook.
+
+| voting system                      | electorate                  | dispersion     | supported                | completed                |
+| ---------------------------------- | --------------------------- | -------------- | ------------------------ | ------------------------ |
+| plurality                          | centered, bipolar, tripolar | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> |
+| majority                           | centered, bipolar, tripolar | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> |
+| ranked choice                      | centered, bipolar, tripolar | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> |
+| plurality, majority, ranked choice | swedish public              | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> |
+
 ### Getting started
 
 ```
@@ -9,7 +20,7 @@ This repo contains the code for simulating voting systems as part of a class pro
 python3 -m pip install -r requirements.txt
 
 # run the simulation for a given voting system, and visualise
-python3 src/vsim/cli.py \
+python3 cli.py \
     --voting-system plurality \
     --scenario polarized \
     --candidates 2 \
@@ -18,7 +29,7 @@ python3 src/vsim/cli.py \
     --log debug
 
 # run with more settings, logging and graphical output
-python3 src/vsim/cli.py \
+python3 cli.py \
     --voting-system majority \
     --candidates 5
     --population 10_000
