@@ -19,7 +19,7 @@ class ElectionResult:
 class VotingSystem(ABC):
     """Strategy for running simulator, akin to given system of voting"""
 
-    def __init__(self, params: dict):
+    def __init__(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -28,8 +28,8 @@ class VotingSystem(ABC):
 
 
 class NaivePlurality(VotingSystem):
-    def __init__(self, params: dict):
-        self.params = params
+    def __init__(self, *args, **kwargs):
+        pass
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
@@ -50,8 +50,15 @@ class NaivePlurality(VotingSystem):
 
 
 class PopularMajority(VotingSystem):
-    def __init__(self, params: dict):
-        self.params = params
+    def __init__(
+        self,
+        percentage_threshold: float = 50,
+        round_knockoffs: int = 1,
+        *args,
+        **kwargs,
+    ):
+        self.threshold = percentage_threshold
+        self.knockoffs = round_knockoffs
 
     def elect_rec(
         self, electorate: np.ndarray, candidates: np.ndarray, prior_results=[]
@@ -94,19 +101,20 @@ class PopularMajority(VotingSystem):
 
 
 class ApprovalVoting(VotingSystem):
-    def __init__(self, params: dict):
-        self.params = params
+    def __init__(self, n_approvals_per_voter: int = 2, *args, **kwargs):
+        self.n_approvals_per_voter = n_approvals_per_voter
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
-        n_votes = self.params["n_votes"]
         voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
-        assert n_votes <= n_candidates, "more votes than candidates"
+        assert self.n_approvals_per_voter <= n_candidates, "more votes than candidates"
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
         for voter_i in range(voters):
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
-            for top_candidate_id in np.argpartition(distance, range(n_votes))[:n_votes]:
+            for top_candidate_id in np.argpartition(
+                distance, range(self.n_approvals_per_voter)
+            )[: self.n_approvals_per_voter]:
                 electoral_vote_count[top_candidate_id] += 1
 
         winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
@@ -124,11 +132,6 @@ SUPPORTED_VOTING_SYSTEMS = {
 }
 
 
-def setup_voting_system(name: str, params: dict = {}) -> VotingSystem:
+def setup_voting_system(name: str, *args, **kwargs) -> VotingSystem:
     """Helper for setting up the correct voting system"""
-    if name == "approval":
-        params["n_votes"] = 3
-    try:
-        return SUPPORTED_VOTING_SYSTEMS[name](params=params)
-    except KeyError:
-        raise KeyError(f"{name=} is not one of {SUPPORTED_VOTING_SYSTEMS.values()}")
+    return SUPPORTED_VOTING_SYSTEMS[name](*args, **kwargs)

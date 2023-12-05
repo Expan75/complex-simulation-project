@@ -3,8 +3,17 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from dataclasses import dataclass
 from typing import Optional
+from vsim import common
 from vsim.voting_system import VotingSystem, ElectionResult
+
+
+@dataclass
+class SimulationResult:
+    measured_fairness: float
+    election_result: ElectionResult
+    parameters: Optional[dict] = None
 
 
 class VotingSimulator:
@@ -17,19 +26,19 @@ class VotingSimulator:
         self,
         electorate: np.ndarray,
         candidates: np.ndarray,
-        scenario: str,
-        log: logging.Logger,
         system: VotingSystem,
         plot: bool = False,
         seed: Optional[int] = None,
+        log: Optional[logging.Logger] = None,
+        scenario: Optional[str] = None,
     ):
         # misc settings
         np.random.seed(seed)  # None means random without seed
         self.plot = plot
-        self.log = log
+        self.log = log if log is not None else common.conf_logger(1, "vsim.log")
 
         # sim params
-        self.scenario = scenario
+        self.scenario = scenario if scenario is None else "no scenario"
         self.voting_system: VotingSystem = system
 
         # simulation agents
@@ -50,7 +59,6 @@ class VotingSimulator:
 
     def calculate_fairness(self, result: ElectionResult) -> float:
         """Fairness is calculated as the average distance to the winner"""
-
         avg_distances = []
         for winner in result.winners:
             avg_dist_to_winner = np.mean(
@@ -84,10 +92,16 @@ class VotingSimulator:
         self.log.debug("running voting sim")
         result = self.voting_system.elect(self.electorate, self.candidates)
         fairness = self.calculate_fairness(result)
-        print(f"fairness={fairness:.2f}")
+        simulation_result = {
+            "election_result": result,
+            "measured_fairness": fairness,
+            "parameters": {},
+        }
 
         if self.plot:
             self.display(result, fairness)
+
+        return SimulationResult(**simulation_result)
 
 
 if __name__ == "__main__":
