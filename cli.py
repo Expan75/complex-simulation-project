@@ -20,7 +20,9 @@ parser.add_argument(
     default="default",
 )
 parser.add_argument(
-    "--electorate-scenario", "-es", choices=electorate.ELECTORATE_SCENARIOS.keys()
+    "--electorate-scenario",
+    "-es",
+    choices=electorate.ELECTORATE_SCENARIOS.keys(),
 )
 parser.add_argument("--seed", "-s", type=int, default=None)
 parser.add_argument("--log", "-l", type=str, default="DEBUG", required=False)
@@ -37,7 +39,10 @@ def main():
 
     system = voting_system.setup_voting_system(args.voting_system)
     voters = electorate.setup_electorate(
-        args.population, args.issues, args.electorate_scenario, seed=args.seed
+        electorate_size=args.population,
+        issues=args.issues,
+        scenario=args.electorate_scenario,
+        seed=args.seed,
     )
     parties = candidates.setup_candidates(
         candidates=args.candidates,
@@ -55,7 +60,8 @@ def main():
         scenario=args.electorate_scenario,
         log=log,
     )
-    sim.run()
+    result = sim.run()
+    print(result)
 
 
 if __name__ == "__main__":

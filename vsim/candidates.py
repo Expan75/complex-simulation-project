@@ -55,8 +55,18 @@ CANDIDATE_OPTIONS: Dict[str, Callable] = {
 
 
 def setup_candidates(
-    candidates: int, electorate: np.ndarray, scenario: str, seed: Optional[int] = None
+    candidates: int,
+    electorate: np.ndarray,
+    scenario: Optional[str] = None,
+    seed: Optional[int] = None,
+    *args,
+    **kwargs
 ) -> np.ndarray:
-    return CANDIDATE_OPTIONS[scenario](
-        n_candidates=candidates, electorate=electorate, seed=seed
-    )
+    if scenario is not None:
+        return CANDIDATE_OPTIONS[scenario](
+            n_candidates=candidates, electorate=electorate, seed=seed
+        )
+    else:
+        return generate_default_candidates(
+            n_candidates=candidates, electorate=electorate, seed=seed
+        )
