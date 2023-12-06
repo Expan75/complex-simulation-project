@@ -151,15 +151,19 @@ class ProportionalRepresentation(VotingSystem):
             for c, v in electoral_vote_count.items()
             if (v / voters) < self.threshold
         }
+
         remaining_votes = voters - sum(votes_below_tresholds.values())
         allocated_seats = {
-            c: v / remaining_votes
+            c: (v / remaining_votes) * self.seats
             for c, v in electoral_vote_count.items()
             if c not in votes_below_tresholds
         }
 
-        # loosely defined in this context, but here we just choose it to be the candidate
-        # with the most seats
+        assert (
+            sum(allocated_seats.values()) == self.seats
+        ), "all seats were not allocated"
+
+        # loosely defined here, but just seen as candidate with highest seat count
         winner = max(allocated_seats, key=lambda c: allocated_seats[c])
         return ElectionResult(winners={winner}, cast_votes=allocated_seats)
 
@@ -176,3 +180,7 @@ SUPPORTED_VOTING_SYSTEMS = {
 def setup_voting_system(name: str, *args, **kwargs) -> VotingSystem:
     """Helper for setting up the correct voting system"""
     return SUPPORTED_VOTING_SYSTEMS[name](*args, **kwargs)
+
+
+if __name__ == "__main__":
+    pass
