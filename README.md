@@ -6,14 +6,22 @@ This repo contains the code for simulating voting systems as part of a class pro
 
 This matrix corresponds to the experiments were are planning to run and wether or not the simulator currently supports doing so. Completed means that results of simulation are captured in a version controlled notebook.
 
-| voting system                      | electorate                  | dispersion     | supported                | completed                |
-| ---------------------------------- | --------------------------- | -------------- | ------------------------ | ------------------------ |
-| plurality                          | centered, bipolar, tripolar | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> |
-| majority                           | centered, bipolar, tripolar | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> |
-| ranked choice                      | centered, bipolar, tripolar | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> |
-| plurality, majority, ranked choice | swedish public              | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> |
+| voting system                      | electorate scenario | dispersion     | supported                | completed analysis       | notebook     |
+| ---------------------------------- | ------------------- | -------------- | ------------------------ | ------------------------ | ------------ |
+| plurality                          | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [x] </li></ul> | &lt;path&gt; |
+| majority                           | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [x] </li></ul> | &lt;path&gt; |
+| ranked choice                      | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| proportional, no threshold         | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| proportional, 4% threshold         | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| plurality, majority, ranked choice | swedish public      | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
 
-### Getting started
+### Getting started with analysis
+
+You can use the simulator to simulate and analyse different electoral systems. Checkout the **experiments.ipynb** notebook for a walkthrough.
+
+### Getting started with development
+
+If you are opting to help run the simulator, it is many times easier to run it via the command line. See below for how to do that.
 
 ```
 # install dependencies
@@ -64,8 +72,8 @@ git push -u origin my-feature-branch
 
 5. Complete code review and your done!
 
+### Testing parameters
 
-### Testing parameters 
 Voting systems: plurality, majority, approval
 Populaton size: 10 000, 100 000, 1 000 000, 10 000 000
 Candidates: 2, 4, 6, 8
@@ -73,9 +81,10 @@ scenario: centered, random, polarized 2 cohorts, polarized 4 cohorts, polarized 
 standard deviations, what is proper standard deviation?
 
 ### Future testing parameters
+
 Voting apathy (to long distance --> no vote)
 
-simulate the swedish parties from data in reasearch 
+simulate the swedish parties from data in reasearch
 
 strategic voting (vote nearest)
 support voting (4% limit)
