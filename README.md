@@ -17,7 +17,11 @@ This matrix corresponds to the experiments were are planning to run and wether o
 
 ### Getting started with analysis
 
-You can use the simulator to simulate and analyse different electoral systems. Checkout the **experiments.ipynb** notebook for a walkthrough.
+You can use the simulator to simulate and analyse different electoral systems. Checkout the **plurality_vs_majority.ipynb** notebook for a walkthrough. You can open it via jupyter notebook by running the command:
+
+```bash
+python3 -m jupyter notebook plurality_vs_majority.ipynb
+```
 
 ### Getting started with development
 
