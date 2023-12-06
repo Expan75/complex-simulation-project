@@ -124,11 +124,52 @@ class ApprovalVoting(VotingSystem):
         return result
 
 
+class ProportionalRepresentation(VotingSystem):
+    """
+    Implements a proportional representation system, which is typically found in
+    most parliament elections (Sweden etc.).
+    """
+
+    def __init__(
+        self, seats_to_allocate: int, min_share_threshold: float = 0.04, *args, **kwargs
+    ):
+        self.seats: int = seats_to_allocate
+        self.threshold: float = min_share_threshold
+
+    def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
+        voters, _ = electorate.shape
+        n_candidates, _ = candidates.shape
+        electoral_vote_count = {i: 0 for i in range(n_candidates)}
+
+        for voter_i in range(voters):
+            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
+            preferred_candidate = np.argmin(distance)
+            electoral_vote_count[preferred_candidate] += 1
+
+        votes_below_tresholds = {
+            c: v
+            for c, v in electoral_vote_count.items()
+            if (v / voters) < self.threshold
+        }
+        remaining_votes = voters - sum(votes_below_tresholds.values())
+        allocated_seats = {
+            c: v / remaining_votes
+            for c, v in electoral_vote_count.items()
+            if c not in votes_below_tresholds
+        }
+
+        # loosely defined in this context, but here we just choose it to be the candidate
+        # with the most seats
+        winner = max(allocated_seats, key=lambda c: allocated_seats[c])
+        return ElectionResult(winners={winner}, cast_votes=allocated_seats)
+
+
 # constant of what systems are supported currently
 SUPPORTED_VOTING_SYSTEMS = {
     "plurality": NaivePlurality,
     "majority": PopularMajority,
     "approval": ApprovalVoting,
+    "proportional": ProportionalRepresentation,
 }
 
 
