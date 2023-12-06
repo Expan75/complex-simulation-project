@@ -131,7 +131,11 @@ class ProportionalRepresentation(VotingSystem):
     """
 
     def __init__(
-        self, seats_to_allocate: int, min_share_threshold: float = 0.04, *args, **kwargs
+        self,
+        seats_to_allocate: int = 349,
+        min_share_threshold: float = 0.04,
+        *args,
+        **kwargs,
     ):
         self.seats: int = seats_to_allocate
         self.threshold: float = min_share_threshold
