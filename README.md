@@ -6,14 +6,16 @@ This repo contains the code for simulating voting systems as part of a class pro
 
 This matrix corresponds to the experiments were are planning to run and wether or not the simulator currently supports doing so. Completed means that results of simulation are captured in a version controlled notebook.
 
-| voting system                      | electorate scenario | dispersion     | supported                | completed analysis       | notebook     |
-| ---------------------------------- | ------------------- | -------------- | ------------------------ | ------------------------ | ------------ |
-| plurality                          | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [x] </li></ul> | &lt;path&gt; |
-| majority                           | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [x] </li></ul> | &lt;path&gt; |
-| ranked choice                      | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
-| proportional, no threshold         | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
-| proportional, 4% threshold         | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
-| plurality, majority, ranked choice | swedish public      | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| voting system              | electorate scenario | dispersion     | supported                | completed analysis       | notebook     |
+| -------------------------- | ------------------- | -------------- | ------------------------ | ------------------------ | ------------ |
+| plurality                  | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [x] </li></ul> | &lt;path&gt; |
+| majority                   | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [x] </li></ul> | &lt;path&gt; |
+| ranked choice              | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| proportional, no threshold | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| proportional, 4% threshold | all                 | None, high     | <ul><li>- [x] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| plurality                  | swedish public      | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| majority                   | swedish public      | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
+| ranked choice              | swedish public      | not applicable | <ul><li>- [ ] </li></ul> | <ul><li>- [ ] </li></ul> | &lt;path&gt; |
 
 ### Getting started with analysis
 
