@@ -30,15 +30,14 @@ def allocate_votes(
 
     # build tree for efficient NN lookup
     kd_tree = KDTree(candidates)
+    _, closest_candidates = kd_tree.query(electorate, k=votes)
 
     for i in range(n_voters):
         voter_apathetic = np.random.rand() < apathy_prob
         if voter_apathetic:
             continue
-
-        voter = electorate[i, :]
-        _, closest_candidates = kd_tree.query(voter, k=votes)
-        counted_votes[closest_candidates] += 1
+        else:
+            counted_votes[closest_candidates[i]] += 1
 
     return dict(enumerate(counted_votes))
 
