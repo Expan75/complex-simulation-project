@@ -43,7 +43,7 @@ def normalize(v: np.ndarray) -> np.ndarray:
 def setup_electorate(
     electorate_size,
     issues,
-    cluster_std: Optional[Union[float, int]] = None,
+    cluster_std: Union[float, int] = 1,
     clusters: Optional[int] = None,
     scenario: Optional[str] = None,
     seed: Optional[int] = None,
@@ -56,6 +56,7 @@ def setup_electorate(
                 electorate_size=electorate_size,
                 issues=issues,
                 seed=seed,
+                cluster_std=cluster_std,
             )
         )
     else:

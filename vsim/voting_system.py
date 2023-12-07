@@ -28,8 +28,8 @@ class VotingSystem(ABC):
 
 
 class NaivePlurality(VotingSystem):
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, apathy_prob: float = 0.0, *args, **kwargs):
+        self.apathy_prob = apathy_prob
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
@@ -37,6 +37,9 @@ class NaivePlurality(VotingSystem):
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
         for voter_i in range(voters):
+            # don't count if apathetic
+            if np.random.rand() < self.apathy_prob:
+                continue
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
             preferred_candidate = np.argmin(distance)
             electoral_vote_count[preferred_candidate] += 1
@@ -52,12 +55,14 @@ class NaivePlurality(VotingSystem):
 class PopularMajority(VotingSystem):
     def __init__(
         self,
-        percentage_threshold: float = 50,
+        apathy_prob: float = 0.0,
+        share_threshold: float = 0.5,
         round_knockoffs: int = 1,
         *args,
         **kwargs,
     ):
-        self.threshold = percentage_threshold
+        self.apathy_prob = apathy_prob
+        self.threshold = share_threshold
         self.knockoffs = round_knockoffs
 
     def elect_rec(
@@ -68,6 +73,9 @@ class PopularMajority(VotingSystem):
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
         for voter_i in range(voters):
+            # don't count if apathetic
+            if np.random.rand() < self.apathy_prob:
+                continue
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
             preferred_candidate = np.argmin(distance)
             electoral_vote_count[preferred_candidate] += 1
@@ -101,7 +109,10 @@ class PopularMajority(VotingSystem):
 
 
 class ApprovalVoting(VotingSystem):
-    def __init__(self, n_approvals_per_voter: int = 2, *args, **kwargs):
+    def __init__(
+        self, apathy_prob: float = 0.0, n_approvals_per_voter: int = 2, *args, **kwargs
+    ):
+        self.apathy_prob = apathy_prob
         self.n_approvals_per_voter = n_approvals_per_voter
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
@@ -111,6 +122,10 @@ class ApprovalVoting(VotingSystem):
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
         for voter_i in range(voters):
+            # don't count if apathetic
+            if np.random.rand() < self.apathy_prob:
+                continue
+
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
             for top_candidate_id in np.argpartition(
                 distance, range(self.n_approvals_per_voter)
@@ -132,6 +147,7 @@ class ProportionalRepresentation(VotingSystem):
 
     def __init__(
         self,
+        apathy_prob: float = 0.0,
         seats_to_allocate: int = 349,
         min_share_threshold: float = 0.04,
         *args,
@@ -139,6 +155,7 @@ class ProportionalRepresentation(VotingSystem):
     ):
         self.seats: int = seats_to_allocate
         self.threshold: float = min_share_threshold
+        self.apathy_prob: float = apathy_prob
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
@@ -146,6 +163,10 @@ class ProportionalRepresentation(VotingSystem):
         electoral_vote_count = {i: 0 for i in range(n_candidates)}
 
         for voter_i in range(voters):
+            # don't count if apathetic
+            if np.random.rand() < self.apathy_prob:
+                continue
+
             distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
             preferred_candidate = np.argmin(distance)
             electoral_vote_count[preferred_candidate] += 1
