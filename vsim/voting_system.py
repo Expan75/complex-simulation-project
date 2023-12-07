@@ -6,14 +6,43 @@ To add a new voting system, subclass the VotingSystem abstract base calss and be
 import operator
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import List, Set
+from typing import List, Set, Dict
 from dataclasses import dataclass
+from scipy.spatial import KDTree
 
 
 @dataclass
 class ElectionResult:
     winners: Set[int]
     cast_votes: dict
+
+
+def allocate_votes(
+    electorate: np.ndarray,
+    candidates: np.ndarray,
+    votes: int = 1,
+    apathy_prob: float = 0.0,
+) -> Dict[int, int]:
+    """Allocates votes from electorate to candidates nearest neighbour(s)"""
+    n_voters, _ = electorate.shape
+    n_candidates, _ = candidates.shape
+    counted_votes = {i: 0 for i in range(n_candidates)}
+
+    # build tree for efficient NN lookup
+    kd_tree = KDTree(candidates)
+
+    for i in range(n_voters):
+        voter_apathetic = np.random.rand() < apathy_prob
+        if voter_apathetic:
+            continue
+
+        voter = electorate[i, :]
+        allocated_votes = kd_tree.query(voter, k=votes)
+
+        for candidate_j in allocated_votes:
+            counted_votes[candidate_j] += 1
+
+    return counted_votes
 
 
 class VotingSystem(ABC):
@@ -27,24 +56,15 @@ class VotingSystem(ABC):
         pass
 
 
-class NaivePlurality(VotingSystem):
+class Plurality(VotingSystem):
     def __init__(self, apathy_prob: float = 0.0, *args, **kwargs):
         self.apathy_prob = apathy_prob
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
-        voters, _ = electorate.shape
-        n_candidates, _ = candidates.shape
-        electoral_vote_count = {i: 0 for i in range(n_candidates)}
-
-        for voter_i in range(voters):
-            # don't count if apathetic
-            if np.random.rand() < self.apathy_prob:
-                continue
-            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
-            preferred_candidate = np.argmin(distance)
-            electoral_vote_count[preferred_candidate] += 1
-
-        # plurality only has a single winner
+        """Elect a single winner by plurality (whoever gets the most votes)"""
+        electoral_vote_count = allocate_votes(
+            electorate, candidates, votes=1, apathy_prob=self.apathy_prob
+        )
         winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
         winners: Set[int] = {winner_idx}
         result = ElectionResult(cast_votes=electoral_vote_count, winners=winners)
@@ -52,56 +72,61 @@ class NaivePlurality(VotingSystem):
         return result
 
 
-class PopularMajority(VotingSystem):
+class Majority(VotingSystem):
     def __init__(
         self,
         apathy_prob: float = 0.0,
         share_threshold: float = 0.5,
-        round_knockoffs: int = 1,
+        round_knockouts: int = 1,
         *args,
         **kwargs,
     ):
         self.apathy_prob = apathy_prob
         self.threshold = share_threshold
-        self.knockoffs = round_knockoffs
+        self.knockouts = round_knockouts
 
     def elect_rec(
         self, electorate: np.ndarray, candidates: np.ndarray, prior_results=[]
     ) -> List[ElectionResult]:
+        """Keeps knocking out candidates until one passes share threshold"""
+
         voters, _ = electorate.shape
-        n_candidates, _ = candidates.shape
-        electoral_vote_count = {i: 0 for i in range(n_candidates)}
+        electoral_vote_count = allocate_votes(electorate, candidates, votes=1)
 
-        for voter_i in range(voters):
-            # don't count if apathetic
-            if np.random.rand() < self.apathy_prob:
-                continue
-            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
-            preferred_candidate = np.argmin(distance)
-            electoral_vote_count[preferred_candidate] += 1
+        # check winner share and terminate if above threshold
+        winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
+        winner_share = electoral_vote_count[winner_idx] / voters
+        above_threshold = winner_share > self.threshold
 
-        # unlike plurality, unless the winner surpasses 50%, knock out k members from the
-        # race and re-elect until a clear majority can be crowned victor.
-        plurality_winner_idx, _ = max(
-            electoral_vote_count.items(), key=operator.itemgetter(1)
-        )
-        plurality_winner_share = electoral_vote_count[plurality_winner_idx] / voters
-        majority_achieved = plurality_winner_share > 0.5
-
-        result = ElectionResult({plurality_winner_idx}, cast_votes=electoral_vote_count)
+        result = ElectionResult({winner_idx}, cast_votes=electoral_vote_count)
         results = [*prior_results, result]
 
-        if majority_achieved:
+        if above_threshold:
             return results
         else:
-            # drop biggest loser and run second stage
-            plurality_worst_loser_idx, _ = min(
-                electoral_vote_count.items(), key=operator.itemgetter(1)
-            )
-            culled_candidates = np.delete(
-                candidates, [plurality_worst_loser_idx], axis=0
-            )
-            return self.elect_rec(electorate, culled_candidates, results)
+            # cull k worst, TODO: fix so we don't throw away original indices here!
+            worst_performers = [
+                i
+                for i, _ in sorted(
+                    [(c, v) for c, v in electoral_vote_count.items()],
+                    key=operator.itemgetter(1),
+                    reverse=True,
+                )
+            ]
+
+            # catch situation where we knock out more than remains
+            knockouts_to_apply = self.knockouts
+            candidates_remaining = len(electoral_vote_count.keys()) - knockouts_to_apply
+            while candidates_remaining < 2:
+                candidates_remaining = (
+                    len(electoral_vote_count.keys()) - knockouts_to_apply
+                )
+                knockouts_to_apply -= 1
+
+            knocked_out = worst_performers[:knockouts_to_apply]
+            next_round_candidates = np.delete(candidates, knocked_out, axis=0)
+
+            return self.elect_rec(electorate, next_round_candidates, results)
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         results: List[ElectionResult] = self.elect_rec(electorate, candidates)
@@ -119,18 +144,12 @@ class ApprovalVoting(VotingSystem):
         voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
         assert self.n_approvals_per_voter <= n_candidates, "more votes than candidates"
-        electoral_vote_count = {i: 0 for i in range(n_candidates)}
-
-        for voter_i in range(voters):
-            # don't count if apathetic
-            if np.random.rand() < self.apathy_prob:
-                continue
-
-            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
-            for top_candidate_id in np.argpartition(
-                distance, range(self.n_approvals_per_voter)
-            )[: self.n_approvals_per_voter]:
-                electoral_vote_count[top_candidate_id] += 1
+        electoral_vote_count = allocate_votes(
+            electorate,
+            candidates,
+            votes=self.n_approvals_per_voter,
+            apathy_prob=self.apathy_prob,
+        )
 
         winner_idx, _ = max(electoral_vote_count.items(), key=operator.itemgetter(1))
         winners: Set[int] = {winner_idx}
@@ -159,29 +178,18 @@ class ProportionalRepresentation(VotingSystem):
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
-        n_candidates, _ = candidates.shape
-        electoral_vote_count = {i: 0 for i in range(n_candidates)}
-
-        for voter_i in range(voters):
-            # don't count if apathetic
-            if np.random.rand() < self.apathy_prob:
-                continue
-
-            distance = np.linalg.norm(candidates - electorate[voter_i, :], axis=1)
-            preferred_candidate = np.argmin(distance)
-            electoral_vote_count[preferred_candidate] += 1
-
-        votes_below_tresholds = {
+        electoral_vote_count = allocate_votes(electorate, candidates)
+        candidate_votes_under_threshold = {
             c: v
             for c, v in electoral_vote_count.items()
             if (v / voters) < self.threshold
         }
 
-        remaining_votes = voters - sum(votes_below_tresholds.values())
+        remaining_votes = voters - sum(candidate_votes_under_threshold.values())
         allocated_seats = {
             c: round((v / remaining_votes) * self.seats)
             for c, v in electoral_vote_count.items()
-            if c not in votes_below_tresholds
+            if c not in candidate_votes_under_threshold
         }
 
         assert (
@@ -195,8 +203,8 @@ class ProportionalRepresentation(VotingSystem):
 
 # constant of what systems are supported currently
 SUPPORTED_VOTING_SYSTEMS = {
-    "plurality": NaivePlurality,
-    "majority": PopularMajority,
+    "plurality": Plurality,
+    "majority": Majority,
     "approval": ApprovalVoting,
     "proportional": ProportionalRepresentation,
 }
