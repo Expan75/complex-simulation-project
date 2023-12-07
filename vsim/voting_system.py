@@ -6,7 +6,7 @@ To add a new voting system, subclass the VotingSystem abstract base calss and be
 import operator
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import List, Set, Dict, Union
+from typing import List, Set, Dict
 from dataclasses import dataclass
 from scipy.spatial import KDTree
 
@@ -138,7 +138,6 @@ class ApprovalVoting(VotingSystem):
         self.n_approvals_per_voter = n_approvals_per_voter
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
-        voters, _ = electorate.shape
         n_candidates, _ = candidates.shape
         assert self.n_approvals_per_voter <= n_candidates, "more votes than candidates"
         electoral_vote_count = allocate_votes(
