@@ -58,7 +58,7 @@ class VotingSimulator:
         return int(self.electorate.shape[1])
 
     def calculate_fairness(self, result: ElectionResult) -> float:
-        """Fairness is calculated as the average distance to the winner"""
+        """Fairness is defined as the average distance to the winner(s)"""
         avg_distances = []
         for winner in result.winners:
             avg_dist_to_winner = np.mean(
@@ -67,6 +67,21 @@ class VotingSimulator:
             avg_distances.append(avg_dist_to_winner)
 
         return float(np.mean(avg_distances))
+
+    def calculate_weighted_fairness(self, result: ElectionResult) -> float:
+        """Like above but weighted by election share outcome"""
+        avg_distances = {}
+        for candidate in result.cast_votes:
+            avg_dist_to_candidate = np.mean(
+                np.linalg.norm(self.candidates[candidate] - self.electorate)
+            )
+            avg_distances[candidate] = avg_dist_to_candidate
+
+        votes_total = sum(v for v in result.cast_votes.values())
+        avg_distances_weights = [dist / votes_total for dist in avg_distances]
+        avg_distances = np.array(avg_distances.values())
+
+        return float(np.average(avg_distances, avg_distances_weights))
 
     def display(self, result: ElectionResult, fairness: float):
         """Renders an election"""
