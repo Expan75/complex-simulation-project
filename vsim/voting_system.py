@@ -6,7 +6,7 @@ To add a new voting system, subclass the VotingSystem abstract base calss and be
 import operator
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Union
 from dataclasses import dataclass
 from scipy.spatial import KDTree
 
@@ -26,7 +26,7 @@ def allocate_votes(
     """Allocates votes from electorate to candidates nearest neighbour(s)"""
     n_voters, _ = electorate.shape
     n_candidates, _ = candidates.shape
-    counted_votes = {i: 0 for i in range(n_candidates)}
+    counted_votes = np.zeros(n_candidates)
 
     # build tree for efficient NN lookup
     kd_tree = KDTree(candidates)
@@ -37,12 +37,10 @@ def allocate_votes(
             continue
 
         voter = electorate[i, :]
-        allocated_votes = kd_tree.query(voter, k=votes)
+        _, closest_candidates = kd_tree.query(voter, k=votes)
+        counted_votes[closest_candidates] += 1
 
-        for candidate_j in allocated_votes:
-            counted_votes[candidate_j] += 1
-
-    return counted_votes
+    return dict(enumerate(counted_votes))
 
 
 class VotingSystem(ABC):
