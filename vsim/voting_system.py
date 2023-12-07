@@ -158,7 +158,7 @@ class ProportionalRepresentation(VotingSystem):
 
         remaining_votes = voters - sum(votes_below_tresholds.values())
         allocated_seats = {
-            c: (v / remaining_votes) * self.seats
+            c: round((v / remaining_votes) * self.seats)
             for c, v in electoral_vote_count.items()
             if c not in votes_below_tresholds
         }
