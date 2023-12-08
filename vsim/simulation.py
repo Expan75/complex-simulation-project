@@ -11,8 +11,8 @@ from vsim.voting_system import VotingSystem, ElectionResult
 
 @dataclass
 class SimulationResult:
-    measured_fairness: float
-    measured_weighted_fairness: float
+    weighted_fairness: float
+    unweighted_fairness: float
     election_result: ElectionResult
     parameters: Optional[dict] = None
 
@@ -109,13 +109,13 @@ class VotingSimulator:
         result = self.voting_system.elect(self.electorate, self.candidates)
         simulation_result = {
             "election_result": result,
-            "measured_fairness": self.calculate_fairness(result),
-            "measured_weighted_fairness": self.calculate_weighted_fairness(result),
+            "unweighted_fairness": self.calculate_fairness(result),
+            "weighted_fairness": self.calculate_weighted_fairness(result),
             "parameters": {},
         }
 
         if self.plot:
-            self.display(result, simulation_result["measured_fairness"])
+            self.display(result, simulation_result["unweighted_fairness"])
 
         return SimulationResult(**simulation_result)
 
