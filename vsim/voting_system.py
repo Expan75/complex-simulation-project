@@ -3,6 +3,7 @@ This module contains strategy classes that implement different voting systems
 
 To add a new voting system, subclass the VotingSystem abstract base calss and be sure to implement the 'elect' method. Have a look at one of the current implementations for help!
 """
+import random
 import operator
 import numpy as np
 from abc import ABC, abstractmethod
@@ -188,9 +189,14 @@ class ProportionalRepresentation(VotingSystem):
             if c not in candidate_votes_under_threshold
         }
 
-        assert (
-            sum(allocated_seats.values()) == self.seats
-        ), "all seats were not allocated"
+        # handle off by one, or further underallocation
+        all_seats_allocated = sum(allocated_seats.values()) == self.seats
+        if all_seats_allocated - 1 == self.seats:
+            # randomly allocate the last seat
+            cand_final = random.choice(list(allocated_seats.keys()))
+            allocated_seats[cand_final] += 1
+        elif not all_seats_allocated:
+            raise RuntimeError("seat allocation off by more than one")
 
         # loosely defined here, but just seen as candidate with highest seat count
         winner = max(allocated_seats, key=lambda c: allocated_seats[c])
