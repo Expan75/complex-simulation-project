@@ -11,7 +11,8 @@ from vsim.voting_system import VotingSystem, ElectionResult
 
 @dataclass
 class SimulationResult:
-    measured_fairness: float
+    weighted_fairness: float
+    unweighted_fairness: float
     election_result: ElectionResult
     parameters: Optional[dict] = None
 
@@ -58,7 +59,7 @@ class VotingSimulator:
         return int(self.electorate.shape[1])
 
     def calculate_fairness(self, result: ElectionResult) -> float:
-        """Fairness is defined as the average distance to the winner(s)"""
+        """Fairness is defined as the inversed average distance to the winner(s)"""
         avg_distances = []
         for winner in result.winners:
             avg_dist_to_winner = np.mean(
@@ -66,7 +67,7 @@ class VotingSimulator:
             )
             avg_distances.append(avg_dist_to_winner)
 
-        return float(np.mean(avg_distances))
+        return 1 / float(np.mean(avg_distances))
 
     def calculate_weighted_fairness(self, result: ElectionResult) -> float:
         """Like above but weighted by election share outcome"""
@@ -79,9 +80,9 @@ class VotingSimulator:
 
         votes_total = sum(v for v in result.cast_votes.values())
         avg_distances_weights = [dist / votes_total for dist in avg_distances]
-        avg_distances = np.array(avg_distances.values())
+        avg_distances = np.array(list(avg_distances.values()))
 
-        return float(np.average(avg_distances, avg_distances_weights))
+        return 1 / float(np.average(avg_distances, weights=avg_distances_weights))
 
     def display(self, result: ElectionResult, fairness: float):
         """Renders an election"""
@@ -106,15 +107,15 @@ class VotingSimulator:
     def run(self):
         self.log.debug("running voting sim")
         result = self.voting_system.elect(self.electorate, self.candidates)
-        fairness = self.calculate_fairness(result)
         simulation_result = {
             "election_result": result,
-            "measured_fairness": fairness,
+            "unweighted_fairness": self.calculate_fairness(result),
+            "weighted_fairness": self.calculate_weighted_fairness(result),
             "parameters": {},
         }
 
         if self.plot:
-            self.display(result, fairness)
+            self.display(result, simulation_result["unweighted_fairness"])
 
         return SimulationResult(**simulation_result)
 
