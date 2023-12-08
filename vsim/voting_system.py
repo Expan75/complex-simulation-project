@@ -190,13 +190,13 @@ class ProportionalRepresentation(VotingSystem):
         }
 
         # handle off by one, or further underallocation
-        all_seats_allocated = sum(allocated_seats.values()) == self.seats
-        if all_seats_allocated - 1 == self.seats:
+        seats_allocated = sum(allocated_seats.values())
+        if seats_allocated == self.seats - 1:
             # randomly allocate the last seat
             cand_final = random.choice(list(allocated_seats.keys()))
             allocated_seats[cand_final] += 1
-        elif not all_seats_allocated:
-            raise RuntimeError("seat allocation off by more than one")
+        elif seats_allocated < self.seats:
+            raise RuntimeError(f"{seats_allocated}/{self.seats} off by more than one")
 
         # loosely defined here, but just seen as candidate with highest seat count
         winner = max(allocated_seats, key=lambda c: allocated_seats[c])
