@@ -81,7 +81,7 @@ class VotingSimulator:
         avg_distances_weights = [dist / votes_total for dist in avg_distances]
         avg_distances = np.array(avg_distances.values())
 
-        return float(np.average(avg_distances, avg_distances_weights))
+        return 1 / float(np.average(avg_distances, avg_distances_weights))
 
     def display(self, result: ElectionResult, fairness: float):
         """Renders an election"""
