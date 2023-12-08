@@ -20,8 +20,9 @@ python3 src/vsim/cli.py \
 # run with more settings, logging and graphical output
 python3 src/vsim/cli.py \
     --voting-system majority \
-    --candidates 5
-    --population 10_000
+    --candidates 5 \
+    --population 10_000 \
+    --scenario polarized \
 ```
 
 Supported systems of voting are currently:
