@@ -87,6 +87,7 @@ class VotingSimulator:
             sum(avg_distances_weights)
             >= 1 - 0.0001  # accept minor floating point errors
         ), f"weights {avg_distances_weights} do not sum to 1"
+
         return 1 / float(np.average(avg_distances, weights=avg_distances_weights))
 
     def display(self, result: ElectionResult, fairness: float):
