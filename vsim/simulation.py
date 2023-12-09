@@ -79,8 +79,14 @@ class VotingSimulator:
             avg_distances[candidate] = avg_dist_to_candidate
 
         votes_total = sum(v for v in result.cast_votes.values())
-        avg_distances_weights = [dist / votes_total for dist in avg_distances]
+        avg_distances_weights = [
+            votes / votes_total for votes in result.cast_votes.values()
+        ]
         avg_distances = np.array(list(avg_distances.values()))
+        assert (
+            sum(avg_distances_weights)
+            >= 1 - 0.0001  # accept minor floating point errors
+        ), f"weights {avg_distances_weights} do not sum to 1"
 
         return 1 / float(np.average(avg_distances, weights=avg_distances_weights))
 

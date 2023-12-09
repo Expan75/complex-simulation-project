@@ -4,6 +4,7 @@ This module contains strategy classes that implement different voting systems
 To add a new voting system, subclass the VotingSystem abstract base calss and be sure to implement the 'elect' method. Have a look at one of the current implementations for help!
 """
 import random
+import warnings
 import operator
 import numpy as np
 from abc import ABC, abstractmethod
@@ -140,6 +141,7 @@ class ApprovalVoting(VotingSystem):
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         n_candidates, _ = candidates.shape
+
         assert self.n_approvals_per_voter <= n_candidates, "more votes than candidates"
         electoral_vote_count = allocate_votes(
             electorate,
@@ -166,16 +168,20 @@ class ProportionalRepresentation(VotingSystem):
         apathy_prob: float = 0.0,
         seats_to_allocate: int = 349,
         min_share_threshold: float = 0.04,
+        n_votes_per_voter: int = 1,
         *args,
         **kwargs,
     ):
         self.seats: int = seats_to_allocate
         self.threshold: float = min_share_threshold
         self.apathy_prob: float = apathy_prob
+        self.n_votes_per_voter: int = n_votes_per_voter
 
     def elect(self, electorate: np.ndarray, candidates: np.ndarray) -> ElectionResult:
         voters, _ = electorate.shape
-        electoral_vote_count = allocate_votes(electorate, candidates)
+        electoral_vote_count = allocate_votes(
+            electorate, candidates, votes=self.n_votes_per_voter
+        )
         candidate_votes_under_threshold = {
             c: v
             for c, v in electoral_vote_count.items()
