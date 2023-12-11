@@ -79,7 +79,9 @@ class VotingSimulator:
             avg_distances[candidate] = avg_dist_to_candidate
 
         votes_total = sum(v for v in result.cast_votes.values())
-        avg_distances_weights = [dist / votes_total for dist in avg_distances]
+        avg_distances_weights = [
+            result.cast_votes[dist] / votes_total for dist in avg_distances
+        ]
         avg_distances = np.array(list(avg_distances.values()))
 
         return 1 / float(np.average(avg_distances, weights=avg_distances_weights))
