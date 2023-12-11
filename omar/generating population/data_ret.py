@@ -11,7 +11,19 @@ class PartyData:
         self._load_data()
         self._filter_by_country()
         self._select_columns()
-        self.df['vote_percentage'] = [15, 20, 10, 25, 10, 5, 10, 5]  
+
+        """
+        The swedish parties in the study
+        V
+        S/SAP
+        C
+        L
+        M
+        KD
+        MP
+        SD 
+        """
+        self.df['vote_percentage'] = [6.75, 30.33, 6.71, 4.61, 19.1, 5.34, 5.08, 20.54]  
 
 
     def _load_data(self) -> pd.DataFrame:
@@ -52,15 +64,5 @@ class PartyData:
 if __name__ == "__main__":
 
     party_data = PartyData('research/CHES2019V3.csv', 16)
-    """
-    The swedish parties in the study
-    V
-    S/SAP
-    C
-    L
-    M
-    KD
-    MP
-    SD 
-    """
+
     print(type(party_data.get_dataframe()))

@@ -47,7 +47,7 @@ class PartyDataVisualizer:
             num_samples = int(party['vote_percentage'] / 100 * self.total_samples)
             samples = np.random.multivariate_normal(
                 mean=self.scaled_features[i],
-                cov=np.diag(np.full(self.scaled_features.shape[1], 0.05)),
+                cov=np.diag(np.full(self.scaled_features.shape[1], 0.005)),
                 size=num_samples
             )
             population = np.vstack([population, samples])
@@ -91,18 +91,21 @@ class PartyDataVisualizer:
         self.scaled_features = self.scaler.fit_transform(self.df[[selected_x, selected_y]])
         self.population = self.generate_population()
         self.population_votes = self.assign_to_nearest_party()
-
+        vote_percentage= []
         self.ax.clear()
         for i in range(len(self.df['party'])):
             party_data = self.population[self.population_votes == i]
             self.ax.scatter(party_data[:, 0], party_data[:, 1], color=self.colors[i], alpha=0.5, label=f'#{i+1}')
+            print(party_data)
+            vote_percentage.append(party_data.shape[0]/self.total_samples*100)
 
         for i, (x, y) in enumerate(self.scaled_features):
             self.ax.scatter(x, y, color='red', edgecolor='k', zorder=5)
             self.ax.text(x, y, str(i+1), color='white', fontsize=12, weight='bold', ha='center', va='center',
                         bbox=dict(facecolor=self.colors[i], edgecolor='none', pad=2, alpha=0.8), zorder=5)
+        vote_percentage = [round(num, 1) for num in vote_percentage]
 
-        party_texts = [f"{party} ({vote}%) #{i+1}" for i, (party, vote) in enumerate(zip(self.df['party'], self.df['vote_percentage']))]
+        party_texts = [f"{party} ({vote}%) #{i+1}" for i, (party, vote) in enumerate(zip(self.df['party'], vote_percentage))]
         at = AnchoredText("\n".join(party_texts),
                         prop=dict(size=12), frameon=True,
                         loc='upper left',
