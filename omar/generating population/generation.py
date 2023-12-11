@@ -6,7 +6,8 @@ party_data = PartyData('research/CHES2019V3.csv', 16)
 partiesData = PartyDataVisualizer(party_data.get_dataframe())
 
 population = partiesData.generate_population()
-
+new_pop = partiesData.reverse_transform(population)
+print(new_pop)
 
 """
 The swedish parties in the study
@@ -34,7 +35,7 @@ rows
                    'corrupt_salience','members_vs_leadership'
 
 """
-np.savetxt("pop.csv", population, delimiter=",", header='lrecon,lrecon_sd,lrecon_salience,lrecon_dissent,lrecon_blur,galtan,galtan_sd,galtan_salience,galtan_dissent,galtan_blur,immigrate_policy,immigrate_salience,immigrate_dissent,multiculturalism,multicult_salience,multicult_dissent,redistribution,redist_salience,environment,enviro_salience,spendvtax,deregulation,econ_interven,civlib_laworder,sociallifestyle,religious_principles,ethnic_minorities ,nationalism,urban_rural,protectionism,regions,russian_interference,anti_islam_rhetoric,people_vs_elite,antielite_salience,corrupt_salience,members_vs_leadership', comments='')
+np.savetxt("pop.csv", new_pop, delimiter=",", header='lrecon,lrecon_sd,lrecon_salience,lrecon_dissent,lrecon_blur,galtan,galtan_sd,galtan_salience,galtan_dissent,galtan_blur,immigrate_policy,immigrate_salience,immigrate_dissent,multiculturalism,multicult_salience,multicult_dissent,redistribution,redist_salience,environment,enviro_salience,spendvtax,deregulation,econ_interven,civlib_laworder,sociallifestyle,religious_principles,ethnic_minorities ,nationalism,urban_rural,protectionism,regions,russian_interference,anti_islam_rhetoric,people_vs_elite,antielite_salience,corrupt_salience,members_vs_leadership', comments='')
 
 
 print(type(population))

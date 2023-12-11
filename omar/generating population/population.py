@@ -52,6 +52,9 @@ class PartyDataVisualizer:
             )
             population = np.vstack([population, samples])
         return population
+    def reverse_transform(self,population):
+        reve_transformed = self.scaler.inverse_transform(population)
+        return reve_transformed
 
     def assign_to_nearest_party(self) -> np.array:
         assignments = []
