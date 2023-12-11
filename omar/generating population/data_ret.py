@@ -65,4 +65,4 @@ if __name__ == "__main__":
 
     party_data = PartyData('research/CHES2019V3.csv', 16)
 
-    print(type(party_data.get_dataframe()))
+    print(party_data.get_dataframe())
